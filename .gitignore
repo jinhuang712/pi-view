@@ -1,0 +1,5 @@
+node_modules/
+.pi/extensions/
+.DS_Store
+.env
+.env.*
