@@ -28,6 +28,7 @@ In short, pi-view is useful when you want to keep a text-first model as your mai
 ## Features
 
 - **Dedicated `view` tool** for PNG, JPEG, WebP, GIF, and BMP files.
+- **Optional row handoff**: when [pi-briefly](https://github.com/jinhuang712/pi-briefly) is installed and its terse mode is on, the `view` call line is drawn by pi-briefly — one gray line, `✓ view 查看图片 › /tmp/shot.png` — through the row decorator hub (`Symbol.for("pi.toolRowDecorator.v1")`). Execution, schema, description and the image attachment itself stay with pi-view; without pi-briefly the line is pi-view's own, unchanged.
 - **Direct image support**: when the active Pi model accepts images, `view` returns the image directly to that model.
 - **Vision-model routing**: when the active model is text-only, `view` sends the image to the explicitly configured vision model and returns its description.
 - **No silent fallback**: if no vision model is configured, the tool reports the configuration problem and points to `/pi-view:config`.

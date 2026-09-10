@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { createViewToolDefinition } from "./tools/view.ts";
+import { bindRowDecoration, readToolRowDecoratorHub } from "./row-decoration.ts";
 import { ImageAwareEditor } from "./editor/image-editor.ts";
 import { getConfigPath, getVisionModelString, loadConfig, parseVisionModelId, saveConfig } from "./config.ts";
 import { ANY_IMAGE_PATH_IN_TEXT, imageBasename, isImagePastePath } from "./constants.ts";
@@ -195,7 +196,7 @@ export default function (pi: ExtensionAPI) {
 
   // ---------- Register View tool ----------
   // We need cwd-aware definition; we register a factory that captures current cwd at execution time via ctx.cwd
-  pi.registerTool({
+  const viewDefinition = {
     name: "view",
     label: "view",
     description:
@@ -205,23 +206,37 @@ export default function (pi: ExtensionAPI) {
     parameters: Type.Object({
       path: Type.String({ description: "Path to the image file to view (relative or absolute)" }),
     }),
-    async execute(toolCallId, params, signal, onUpdate, ctx) {
+    async execute(toolCallId: any, params: any, signal: any, onUpdate: any, ctx: any) {
       // Use ctx.cwd for path resolution
       const cwd = (ctx as any).cwd ?? process.cwd();
       const def = createViewToolDefinition(cwd);
       // Delegate to the shared implementation
       return (def as any).execute(toolCallId, params, signal, onUpdate, ctx);
     },
-    renderCall(args, theme, context) {
+    renderCall(args: any, theme: any, context: any) {
       const cwd = (context as any).cwd ?? process.cwd();
       const def = createViewToolDefinition(cwd);
       return (def as any).renderCall(args, theme, context);
     },
-    renderResult(result, options, theme, context) {
+    renderResult(result: any, options: any, theme: any, context: any) {
       const cwd = (context as any).cwd ?? process.cwd();
       const def = createViewToolDefinition(cwd);
       return (def as any).renderResult(result, options, theme, context);
     },
+  };
+  pi.registerTool(viewDefinition as any);
+
+  // The row itself may belong to another extension: hand the presentation over
+  // when pi-briefly is installed, and keep this extension's own line otherwise.
+  // The tool name, schema, description and execution stay ours either way, and
+  // the image attachments are rendered by Pi, not by the row renderer.
+  bindRowDecoration(pi, () => {
+    const decoration = readToolRowDecoratorHub()?.decorate({
+      tool: "view",
+      native: { renderCall: viewDefinition.renderCall, renderResult: viewDefinition.renderResult, renderShell: "default" },
+      schema: { parameters: viewDefinition.parameters },
+    });
+    pi.registerTool((decoration ? { ...viewDefinition, ...decoration } : viewDefinition) as any);
   });
 
   // ---------- Input handling: detect long image paths pasted and hint ----------
