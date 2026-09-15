@@ -174,7 +174,7 @@ function getVisionNote(model: any | undefined): string | undefined {
   if (!model || (Array.isArray(model.input) && model.input.includes("image"))) return undefined;
   const visionStr = getVisionModelString();
   if (!visionStr) {
-    return `[Current model ${model.provider}/${model.id} does not support images. No pi-view.visionModel configured. Run /pi-view:config to set a vision-capable model, or switch main model to one with image input.]`;
+    return `[Current model ${model.provider}/${model.id} does not support images. No pi-view.visionModel configured. Run /pi-view:config to set a vision-capable model, or switch main model to one with image input. If this model is in fact vision-capable, its \`input\` field in ~/.pi/agent/models.json is stale: a hand-written model entry replaces the provider's catalog entry, capabilities included.]`;
   }
   return `[Current model ${model.provider}/${model.id} does not support images. This view will be routed to visionModel ${visionStr} via temporary agent.]`;
 }
