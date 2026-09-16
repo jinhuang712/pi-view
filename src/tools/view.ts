@@ -6,6 +6,7 @@ import type { ImageContent, TextContent } from "@earendil-works/pi-ai";
 import { Text } from "@earendil-works/pi-tui";
 import { Type, type Static } from "typebox";
 import { getVisionModelString, parseVisionModelId } from "../config.ts";
+import type { ViewToolDetails } from "../details.ts";
 import { imageSize } from "image-size";
 
 /**
@@ -21,13 +22,7 @@ const viewSchema = Type.Object({
 
 export type ViewToolInput = Static<typeof viewSchema>;
 
-export interface ViewToolDetails {
-  mimeType?: string;
-  visionRouted?: boolean;
-  sizeKb?: string;
-  pixels?: string;
-  ratio?: string;
-}
+export type { ViewToolDetails } from "../details.ts";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes}b`;

@@ -36,6 +36,7 @@ In short, pi-view is useful when you want to keep a text-first model as your mai
 - **`read` protection**: image reads are blocked with a clear instruction to use `view` instead.
 - **Compact image paths**: long temporary paths are displayed as `[ image-123.png ]` in the editor and user transcript while the submitted tool argument is restored to the full path.
 - **Native-style configuration UI**: `/pi-view:config` provides live fuzzy search, pins the current vision model to the first row, and supports keyboard navigation.
+- **A desktop half**: `src/ui.tsx` draws the same `view` row in a graphical host such as [PID](https://github.com/jinhuang712/pid), out of that host's own components — see [In a window](#in-a-window).
 
 ## Installation
 
@@ -139,6 +140,25 @@ are displayed as:
 
 The full path is restored when the prompt is submitted, allowing `view` to open the original file. Tool-call output continues to show the full absolute path for clarity.
 
+## In a window
+
+`renderCall` and `renderResult` build pi-tui components, and only a terminal can mount one. So pi-view ships a second half beside the first:
+
+```json
+"pi":  { "extensions": ["./src/index.ts"] },
+"pid": { "ui": "./src/ui.tsx" }
+```
+
+A graphical host loads `src/ui.tsx` and gets the same row, drawn out of its own components:
+
+```text
+Viewed  shot.png   63.6kb · 1022x360 · 511:180 · described by vision model
+```
+
+Three of those come from the same `details` the terminal's gray meta line uses. The fourth is the one thing neither the path nor the picture says: the active model could not see the image, so the configured vision model looked at it and the text below is a description rather than the model's own reading. The window shows the picture itself, which the terminal cannot, so the row says what the image is and gets out of the way.
+
+A host that has never heard of `src/ui.tsx` loads the tool alone and draws its own generic row. The two halves never call each other.
+
 ## Development
 
 ```bash
@@ -164,10 +184,15 @@ src/
 ├── components/vision-selector.ts  # Searchable vision-model selector
 ├── config.ts                      # Persistent vision-model configuration
 ├── constants.ts                   # Image-path detection helpers
+├── details.ts                     # What a view call reports; read by both halves
 ├── editor/image-editor.ts         # Image-path pills in the editor
 ├── index.ts                       # Extension registration and routing hooks
-└── tools/view.ts                  # Image loading, metadata, and vision routing
+├── pid-ui.d.ts                    # Local mirror of the desktop host's types
+├── tools/view.ts                  # Image loading, metadata, and vision routing
+└── ui.tsx                         # The desktop half: the same row, for a window
 ```
+
+`npm run typecheck` checks the desktop half against `pid-ui.d.ts`. The host is the source of truth; the mirror only catches a typo here.
 
 ## Known limitations
 
