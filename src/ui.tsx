@@ -13,6 +13,7 @@
  * tool alone and loses nothing but the row.
  */
 
+import { Badge, Say } from "@pid/ui";
 import type { ViewToolDetails } from "./details.ts";
 
 /** What the host hands a tool renderer. Mirrors PID's `ToolDraw`; the host is the source of truth. */
@@ -22,7 +23,7 @@ interface Draw {
   Frame: (props: {
     verb?: string;
     detail?: string;
-    meta?: string;
+    meta?: unknown;
     body?: "args" | "command" | "none";
     children?: unknown;
   }) => unknown;
@@ -44,17 +45,24 @@ function shown(path: string, cwd: string | undefined): string {
 }
 
 /**
- * The same three facts the terminal's meta line carries, in the space the collapsed row has.
+ * The same three facts the terminal's meta line carries, plus the one it only hints at.
  *
- * `visionRouted` is the one thing neither the path nor the picture says: the main model could not
- * see the image, so a configured vision model looked at it and what came back is a description.
- * A reader who does not know that is reading someone else's words as the model's own.
+ * `visionRouted` is what neither the path nor the picture says: the main model could not see the
+ * image, so a configured vision model looked at it and the text below is that model's description.
+ * A reader who does not know is reading someone else's words as the model's own — which is why it
+ * is a tinted pill and the measurements are not. `read` and `bash` have nothing like it because
+ * nothing about those calls is routed anywhere, and the row saying so is the point.
  */
-function meta(d: ViewToolDetails | undefined): string | undefined {
+function meta(d: ViewToolDetails | undefined): unknown {
   if (!d) return undefined;
-  const parts = [d.sizeKb, d.pixels, d.ratio, d.visionRouted ? "described by vision model" : undefined];
-  const kept = parts.filter((p): p is string => Boolean(p));
-  return kept.length > 0 ? kept.join(" · ") : undefined;
+  const said = [d.sizeKb, d.pixels, d.ratio].filter((p): p is string => Boolean(p)).join(" · ");
+  if (!said && !d.visionRouted) return undefined;
+  return (
+    <>
+      {said && <Say tone="faint">{said}</Say>}
+      {d.visionRouted && <Badge tone="accent" title="described by the configured vision model">vision</Badge>}
+    </>
+  );
 }
 
 export default function register(pid: Api) {

@@ -152,10 +152,14 @@ The full path is restored when the prompt is submitted, allowing `view` to open 
 A graphical host loads `src/ui.tsx` and gets the same row, drawn out of its own components:
 
 ```text
-Viewed  shot.png   63.6kb · 1022x360 · 511:180 · described by vision model
+Viewed  shot.png   63.6kb · 1022x360 · 511:180  ( vision )
 ```
 
-Three of those come from the same `details` the terminal's gray meta line uses. The fourth is the one thing neither the path nor the picture says: the active model could not see the image, so the configured vision model looked at it and the text below is a description rather than the model's own reading. The window shows the picture itself, which the terminal cannot, so the row says what the image is and gets out of the way.
+The measurements come from the same `details` the terminal's gray meta line uses. The pill is the one thing neither the path nor the picture says: the active model could not see the image, so the configured vision model looked at it and the text below is that model's description rather than the active model's own reading. It is tinted, and the measurements are not, because a reader who misses it is reading someone else's words as the model's own. A call that was not routed shows no pill.
+
+That is also what makes this row read a little differently from the host's own `read` and `bash` above it — nothing about those calls is routed anywhere, so they have nothing to mark.
+
+The window shows the picture itself, which the terminal cannot, so the row says what the image is and gets out of the way.
 
 A host that has never heard of `src/ui.tsx` loads the tool alone and draws its own generic row. The two halves never call each other.
 
