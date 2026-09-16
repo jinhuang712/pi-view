@@ -85,7 +85,7 @@ export class ImageAwareEditor extends CustomEditor {
   }
 
   /**
-   * Expand both pi's paste markers and pi-view's image pills.
+   * Expand both pi's paste markers and pid-view's image pills.
    * Overriding expandPasteMarkers ensures submitValue() (which calls
    * expandPasteMarkers directly, not getExpandedText) also restores
    * full image paths. This was the root cause of "[ image-xxx.png ]"

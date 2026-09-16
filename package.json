@@ -1,5 +1,5 @@
 {
-  "name": "pi-view",
+  "name": "pid-view",
   "private": false,
   "version": "0.1.0",
   "description": "A Pi extension for image viewing and vision-model routing.",
@@ -7,16 +7,17 @@
   "keywords": ["pi-package", "pi-extension", "pi", "vision", "images"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jinhuang712/pi-view.git"
+    "url": "git+https://github.com/jinhuang712/pid-view.git"
   },
   "bugs": {
-    "url": "https://github.com/jinhuang712/pi-view/issues"
+    "url": "https://github.com/jinhuang712/pid-view/issues"
   },
-  "homepage": "https://github.com/jinhuang712/pi-view#readme",
+  "homepage": "https://github.com/jinhuang712/pid-view#readme",
   "files": [
     "src",
     "assets",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "pi": {
     "extensions": [

@@ -1,8 +1,8 @@
-# pi-view
+# pid-view
 
 A Pi extension that adds a dedicated `view` tool for images, vision-model routing, and compact image-path pills in the editor and transcript.
 
-## Why pi-view?
+## Why pid-view?
 
 Pi agents can work with text files through `read`, but images need a different path:
 
@@ -11,9 +11,9 @@ Pi agents can work with text files through `read`, but images need a different p
 - Pasted image paths from terminals are long, noisy, and make the prompt difficult to read.
 - Switching the whole Pi session to a vision model is inconvenient when the main model is preferred for coding or reasoning.
 
-**pi-view solves this by giving Pi one clear image workflow:** the agent calls `view`, pi-view detects whether the active model can accept images, and either passes the image directly or sends it to the vision model you explicitly configured. The resulting description is returned to the active agent, while pasted paths remain compact in the UI.
+**pid-view solves this by giving Pi one clear image workflow:** the agent calls `view`, pid-view detects whether the active model can accept images, and either passes the image directly or sends it to the vision model you explicitly configured. The resulting description is returned to the active agent, while pasted paths remain compact in the UI.
 
-In short, pi-view is useful when you want to keep a text-first model as your main model but still let it inspect screenshots, designs, diagrams, and other image files on demand.
+In short, pid-view is useful when you want to keep a text-first model as your main model but still let it inspect screenshots, designs, diagrams, and other image files on demand.
 
 ## Demo
 
@@ -28,14 +28,14 @@ In short, pi-view is useful when you want to keep a text-first model as your mai
 ## Features
 
 - **Dedicated `view` tool** for PNG, JPEG, WebP, GIF, and BMP files.
-- **Optional row handoff**: when [pi-briefly](https://github.com/jinhuang712/pi-briefly) is installed and its terse mode is on, the `view` call line is drawn by pi-briefly — one gray line, `✓ view 查看图片 › /tmp/shot.png` — through the row decorator hub (`Symbol.for("pi.toolRowDecorator.v1")`). Execution, schema, description and the image attachment itself stay with pi-view; without pi-briefly the line is pi-view's own, unchanged.
+- **Optional row handoff**: when [pi-briefly](https://github.com/jinhuang712/pi-briefly) is installed and its terse mode is on, the `view` call line is drawn by pi-briefly — one gray line, `✓ view 查看图片 › /tmp/shot.png` — through the row decorator hub (`Symbol.for("pi.toolRowDecorator.v1")`). Execution, schema, description and the image attachment itself stay with pid-view; without pi-briefly the line is pid-view's own, unchanged.
 - **Direct image support**: when the active Pi model accepts images, `view` returns the image directly to that model.
 - **Vision-model routing**: when the active model is text-only, `view` sends the image to the explicitly configured vision model and returns its description.
-- **No silent fallback**: if no vision model is configured, the tool reports the configuration problem and points to `/pi-view:config`.
+- **No silent fallback**: if no vision model is configured, the tool reports the configuration problem and points to `/pid-view:config`.
 - **Image metadata**: tool results include MIME type, file size, pixel dimensions, and aspect ratio.
 - **`read` protection**: image reads are blocked with a clear instruction to use `view` instead.
 - **Compact image paths**: long temporary paths are displayed as `[ image-123.png ]` in the editor and user transcript while the submitted tool argument is restored to the full path.
-- **Native-style configuration UI**: `/pi-view:config` provides live fuzzy search, pins the current vision model to the first row, and supports keyboard navigation.
+- **Native-style configuration UI**: `/pid-view:config` provides live fuzzy search, pins the current vision model to the first row, and supports keyboard navigation.
 - **A desktop half**: `src/ui.tsx` draws the same `view` row in a graphical host such as [PID](https://github.com/jinhuang712/pid), out of that host's own components — see [In a window](#in-a-window).
 
 ## Installation
@@ -43,7 +43,7 @@ In short, pi-view is useful when you want to keep a text-first model as your mai
 ### Install from GitHub
 
 ```bash
-pi install https://github.com/jinhuang712/pi-view
+pi install https://github.com/jinhuang712/pid-view
 ```
 
 Restart Pi after installation. The extension will be discovered from the package manifest.
@@ -51,8 +51,8 @@ Restart Pi after installation. The extension will be discovered from the package
 ### Run from a local checkout
 
 ```bash
-git clone https://github.com/jinhuang712/pi-view.git
-cd pi-view
+git clone https://github.com/jinhuang712/pid-view.git
+cd pid-view
 npm install
 pi --no-extensions -e "$PWD/src/index.ts"
 ```
@@ -62,7 +62,7 @@ pi --no-extensions -e "$PWD/src/index.ts"
 Open the searchable selector:
 
 ```text
-/pi-view:config
+/pid-view:config
 ```
 
 Type a provider, model ID, or model name to filter the available image-capable models. Press Enter to select the highlighted model; press Esc to cancel. The current model is pinned to the first row when the list is unfiltered.
@@ -70,21 +70,23 @@ Type a provider, model ID, or model name to filter the available image-capable m
 You can also set a model directly:
 
 ```text
-/pi-view:config openai-codex/gpt-5.6-luna
+/pid-view:config openai-codex/gpt-5.6-luna
 ```
 
 View or clear the configuration through the same command:
 
 ```text
-/pi-view:config status
-/pi-view:config clear
+/pid-view:config status
+/pid-view:config clear
 ```
 
 The setting is stored at:
 
 ```text
-~/.pi/agent/pi-view.json
+~/.pi/agent/pid-view.json
 ```
+
+The extension was called `pi-view` before it grew a desktop half. A setting left at the old path, `~/.pi/agent/pi-view.json`, is still read when no new file sits beside it, so an existing setup keeps working untouched; the next save writes the new name. The old file is left where it is — it is yours.
 
 Example:
 
@@ -94,7 +96,7 @@ Example:
 }
 ```
 
-Only `/pi-view:config` is registered by this extension.
+Only `/pid-view:config` is registered by this extension.
 
 ## Usage
 
@@ -112,7 +114,7 @@ The tool accepts either an absolute path or a path relative to Pi's current work
 }
 ```
 
-For images, prefer `view` over `read`. If the model attempts to call `read` on an image, pi-view blocks the call and returns guidance to retry with `view`.
+For images, prefer `view` over `read`. If the model attempts to call `read` on an image, pid-view blocks the call and returns guidance to retry with `view`.
 
 ## Routing behavior
 
@@ -120,9 +122,9 @@ For images, prefer `view` over `read`. If the model attempts to call `read` on a
 | --- | --- | --- |
 | Supports `image` input | Any | The image is returned directly to the active model. |
 | Does not support `image` input | Yes | The image is sent to the configured vision model; its description is returned to the active model. |
-| Does not support `image` input | No | `view` returns an explicit configuration error and suggests `/pi-view:config`. |
+| Does not support `image` input | No | `view` returns an explicit configuration error and suggests `/pid-view:config`. |
 
-The routed call uses Pi's model runtime, so the selected provider's normal authentication flow is preserved. pi-view does not automatically choose an unrelated fallback model.
+The routed call uses Pi's model runtime, so the selected provider's normal authentication flow is preserved. pid-view does not automatically choose an unrelated fallback model.
 
 ## Image-path pills
 
@@ -142,7 +144,7 @@ The full path is restored when the prompt is submitted, allowing `view` to open 
 
 ## In a window
 
-`renderCall` and `renderResult` build pi-tui components, and only a terminal can mount one. So pi-view ships a second half beside the first:
+`renderCall` and `renderResult` build pi-tui components, and only a terminal can mount one. So pid-view ships a second half beside the first:
 
 ```json
 "pi":  { "extensions": ["./src/index.ts"] },

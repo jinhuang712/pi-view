@@ -1,5 +1,5 @@
 /**
- * Shared constants for pi-view.
+ * Shared constants for pid-view.
  */
 
 // Long image path pattern: matches otty paste and pi clipboard temp files, plus generic absolute image paths

@@ -13,7 +13,7 @@ import { imageSize } from "image-size";
  * View tool: dedicated image viewer.
  *  - main 支持 image  -> 直接返回图文，主 Agent 自己看
  *  - main 不支持 + 已配 visionModel -> 起临时 vision 子调用描述后返回文字（同时附图供 transcript）
- *  - main 不支持 + 未配 -> 报错引导 /pi-view:config
+ *  - main 不支持 + 未配 -> 报错引导 /pid-view:config
  */
 
 const viewSchema = Type.Object({
@@ -169,7 +169,7 @@ function getVisionNote(model: any | undefined): string | undefined {
   if (!model || (Array.isArray(model.input) && model.input.includes("image"))) return undefined;
   const visionStr = getVisionModelString();
   if (!visionStr) {
-    return `[Current model ${model.provider}/${model.id} does not support images. No pi-view.visionModel configured. Run /pi-view:config to set a vision-capable model, or switch main model to one with image input. If this model is in fact vision-capable, its \`input\` field in ~/.pi/agent/models.json is stale: a hand-written model entry replaces the provider's catalog entry, capabilities included.]`;
+    return `[Current model ${model.provider}/${model.id} does not support images. No pid-view.visionModel configured. Run /pid-view:config to set a vision-capable model, or switch main model to one with image input. If this model is in fact vision-capable, its \`input\` field in ~/.pi/agent/models.json is stale: a hand-written model entry replaces the provider's catalog entry, capabilities included.]`;
   }
   return `[Current model ${model.provider}/${model.id} does not support images. This view will be routed to visionModel ${visionStr} via temporary agent.]`;
 }
@@ -190,7 +190,7 @@ export function createViewToolDefinition(cwd: string) {
       _onUpdate?: unknown,
       ctx?: any,
     ): Promise<{ content: (TextContent | ImageContent)[]; details?: ViewToolDetails }> {
-      // Resolve path relative to cwd, handling @ prefix, ~, and pi-view pills like "[ image-xxx.png ]"
+      // Resolve path relative to cwd, handling @ prefix, ~, and pid-view pills like "[ image-xxx.png ]"
       let raw = String(path ?? "").trim();
       if (raw.startsWith("@")) raw = raw.slice(1);
       // Handle pill fallback: "[ image-123.png ]" -> try to locate actual file by basename
@@ -256,7 +256,7 @@ export function createViewToolDefinition(cwd: string) {
       if (!visionStr) {
         const note =
           getVisionNote(model) ??
-          `[Current model does not support images and no visionModel configured. Run /pi-view:config]`;
+          `[Current model does not support images and no visionModel configured. Run /pid-view:config]`;
         return {
           content: [{ type: "text", text: `${note}\nTried to view image: ${formatRelative(path, cwd)} [${processed.mimeType}]` }],
           details: { mimeType: processed.mimeType, visionRouted: false, ...meta },
@@ -295,7 +295,7 @@ export function createViewToolDefinition(cwd: string) {
               content: [
                 {
                   type: "text",
-                  text: `Viewed image [${processed.mimeType}] ${formatRelative(path, cwd)} via ${visionStr} — vision model not found in registry. Run /pi-view:config to pick an available image model. Image attached.`,
+                  text: `Viewed image [${processed.mimeType}] ${formatRelative(path, cwd)} via ${visionStr} — vision model not found in registry. Run /pid-view:config to pick an available image model. Image attached.`,
                 },
                 { type: "image", data: processed.data, mimeType: processed.mimeType },
               ],

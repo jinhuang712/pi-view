@@ -8,9 +8,9 @@ import { ANY_IMAGE_PATH_IN_TEXT, imageBasename, isImagePastePath } from "./const
 import { VisionModelSelector } from "./components/vision-selector.ts";
 
 export default function (pi: ExtensionAPI) {
-  // ---------- Config command: /pi-view:config (single entry, searchable) ----------
-  pi.registerCommand("pi-view:config", {
-    description: "Configure pi-view vision model (which model to use for image view)",
+  // ---------- Config command: /pid-view:config (single entry, searchable) ----------
+  pi.registerCommand("pid-view:config", {
+    description: "Configure pid-view vision model (which model to use for image view)",
     getArgumentCompletions: (prefix) => {
       const pa = prefix.trim().toLowerCase();
       const base = [
@@ -32,11 +32,11 @@ export default function (pi: ExtensionAPI) {
       // Subcommands that don't require model list
       if (trimmed === "clear" || trimmed === "reset" || trimmed === "unset") {
         saveConfig({ ...loadConfig(), visionModel: undefined });
-        ctx.ui.notify(`pi-view visionModel cleared (was ${current})`, "info");
+        ctx.ui.notify(`pid-view visionModel cleared (was ${current})`, "info");
         return;
       }
       if (trimmed === "status" || trimmed === "show") {
-        ctx.ui.notify(`pi-view: visionModel=${current} | main=${main} | config=${getConfigPath()}`, "info");
+        ctx.ui.notify(`pid-view: visionModel=${current} | main=${main} | config=${getConfigPath()}`, "info");
         return;
       }
 
@@ -45,7 +45,7 @@ export default function (pi: ExtensionAPI) {
         const parsed = parseVisionModelId(trimmed);
         if (parsed) {
           saveConfig({ ...loadConfig(), visionModel: trimmed });
-          ctx.ui.notify(`pi-view visionModel set to ${trimmed} (saved to ${getConfigPath()})`, "info");
+          ctx.ui.notify(`pid-view visionModel set to ${trimmed} (saved to ${getConfigPath()})`, "info");
           return;
         }
         // If contains slash but not parsable, fall through to search
@@ -65,9 +65,9 @@ export default function (pi: ExtensionAPI) {
           const p = parseVisionModelId(raw.trim());
           if (!p) { ctx.ui.notify(`Invalid format: "${raw}"`, "error"); return; }
           saveConfig({ ...loadConfig(), visionModel: raw.trim() });
-          ctx.ui.notify(`pi-view visionModel set to ${raw.trim()}`, "info");
+          ctx.ui.notify(`pid-view visionModel set to ${raw.trim()}`, "info");
         } else {
-          ctx.ui.notify(`pi-view visionModel: ${current} | main: ${main}. No image models found.`, "info");
+          ctx.ui.notify(`pid-view visionModel: ${current} | main: ${main}. No image models found.`, "info");
         }
         return;
       }
@@ -80,7 +80,7 @@ export default function (pi: ExtensionAPI) {
       if (!picked) return;
       const selected = `${picked.provider}/${picked.id}`;
       saveConfig({ ...loadConfig(), visionModel: selected });
-      ctx.ui.notify(`pi-view visionModel set to ${selected}`, "info");
+      ctx.ui.notify(`pid-view visionModel set to ${selected}`, "info");
     },
   });
 
@@ -106,14 +106,14 @@ export default function (pi: ExtensionAPI) {
   // ---------- System prompt injection ----------
   pi.on("before_agent_start", async (event, _ctx) => {
     const addition = `
-## pi-view Image Rule
+## pid-view Image Rule
 - For image files (png/jpg/jpeg/webp/gif/bmp) ALWAYS use the \`view\` tool. Do NOT use \`read\` for images.
 - For text/code files use \`read\`.
 - \`view\` is the ONLY tool that correctly handles images; it will route to a vision-capable model if the current model does not support image input.
 `;
     // Chain with existing prompt
     const base = event.systemPrompt ?? "";
-    if (base.includes("pi-view Image Rule")) return {};
+    if (base.includes("pid-view Image Rule")) return {};
     return { systemPrompt: base + addition };
   });
 
@@ -148,7 +148,7 @@ export default function (pi: ExtensionAPI) {
     if (!visionStr) {
       if (ctx.hasUI) {
         ctx.ui.notify(
-          `Current model ${model.provider}/${model.id} does not support images and no pi-view.visionModel is set. Run /pi-view:config to set one.`,
+          `Current model ${model.provider}/${model.id} does not support images and no pid-view.visionModel is set. Run /pid-view:config to set one.`,
           "warning",
         );
       }
@@ -165,7 +165,7 @@ export default function (pi: ExtensionAPI) {
     } catch {}
     const visionModel = available.find((m: any) => m.provider === parsed.provider && m.id === parsed.id);
     if (!visionModel) {
-      if (ctx.hasUI) ctx.ui.notify(`pi-view: visionModel ${visionStr} not found in registry`, "warning");
+      if (ctx.hasUI) ctx.ui.notify(`pid-view: visionModel ${visionStr} not found in registry`, "warning");
       return;
     }
     // Remember original and switch
@@ -173,7 +173,7 @@ export default function (pi: ExtensionAPI) {
       originalModelBeforeImageTurn = model;
       const ok = await pi.setModel(visionModel);
       if (ok && ctx.hasUI) {
-        ctx.ui.notify(`pi-view: temporarily switched to ${visionStr} for this image turn (will restore after)`, "info");
+        ctx.ui.notify(`pid-view: temporarily switched to ${visionStr} for this image turn (will restore after)`, "info");
       } else {
         originalModelBeforeImageTurn = null;
       }

@@ -2,30 +2,41 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export interface PiViewConfig {
+export interface PidViewConfig {
   /** Provider/model id for vision, e.g. "anthropic/claude-sonnet-4-20250514" or "openai/gpt-4o" */
   visionModel?: string;
 }
 
-const CONFIG_FILE = join(homedir(), ".pi", "agent", "pi-view.json");
+const CONFIG_FILE = join(homedir(), ".pi", "agent", "pid-view.json");
+
+/**
+ * Where the configuration lived before the extension was named `pid-view`.
+ *
+ * Read only when the new file is absent, and never written. Nothing is asked of the user: an
+ * existing setting keeps working, and the next save moves it across. The old file is left where it
+ * is — it is the user's, and deleting it would be this extension deciding that for them.
+ */
+const LEGACY_CONFIG_FILE = join(homedir(), ".pi", "agent", "pi-view.json");
 
 function ensureDir() {
   const dir = join(homedir(), ".pi", "agent");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
-export function loadConfig(): PiViewConfig {
+function readFile(path: string): PidViewConfig | undefined {
   try {
-    if (!existsSync(CONFIG_FILE)) return {};
-    const raw = readFileSync(CONFIG_FILE, "utf-8");
-    const parsed = JSON.parse(raw);
-    return parsed as PiViewConfig;
+    if (!existsSync(path)) return undefined;
+    return JSON.parse(readFileSync(path, "utf-8")) as PidViewConfig;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
-export function saveConfig(cfg: PiViewConfig): void {
+export function loadConfig(): PidViewConfig {
+  return readFile(CONFIG_FILE) ?? readFile(LEGACY_CONFIG_FILE) ?? {};
+}
+
+export function saveConfig(cfg: PidViewConfig): void {
   ensureDir();
   writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), "utf-8");
 }
